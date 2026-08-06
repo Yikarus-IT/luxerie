@@ -27,7 +27,7 @@ class ProductController extends Controller
     {
         Product::create($this->validated($request));
 
-        return redirect()->route('admin.products.index')->with('success', 'Product created.');
+        return redirect()->route('admin.products.index')->with('success', 'Producto creado correctamente.');
     }
 
     public function edit(Product $product): View
@@ -39,14 +39,14 @@ class ProductController extends Controller
     {
         $product->update($this->validated($request, $product));
 
-        return redirect()->route('admin.products.index')->with('success', 'Product updated.');
+        return redirect()->route('admin.products.index')->with('success', 'Producto actualizado correctamente.');
     }
 
     public function destroy(Product $product): RedirectResponse
     {
         $product->delete();
 
-        return back()->with('success', 'Product deleted.');
+        return back()->with('success', 'Producto eliminado correctamente.');
     }
 
     private function validated(Request $request, ?Product $product = null): array

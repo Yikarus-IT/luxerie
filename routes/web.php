@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\HomepageController;
+use App\Http\Controllers\Admin\MediaAssetController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\StorefrontController;
@@ -22,4 +24,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::get('/', DashboardController::class)->name('dashboard');
     Route::resource('products', ProductController::class)->except('show');
     Route::resource('categories', CategoryController::class)->except(['show', 'create', 'edit']);
+    Route::resource('media', MediaAssetController::class)->only(['index', 'store', 'update', 'destroy']);
+    Route::get('homepage', [HomepageController::class, 'edit'])->name('homepage.edit');
+    Route::put('homepage', [HomepageController::class, 'update'])->name('homepage.update');
 });

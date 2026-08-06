@@ -21,25 +21,25 @@ class CategoryController extends Controller
     {
         Category::create($this->validated($request));
 
-        return back()->with('success', 'Category created.');
+        return back()->with('success', 'Categoría creada correctamente.');
     }
 
     public function update(Request $request, Category $category): RedirectResponse
     {
         $category->update($this->validated($request, $category));
 
-        return back()->with('success', 'Category updated.');
+        return back()->with('success', 'Categoría actualizada correctamente.');
     }
 
     public function destroy(Category $category): RedirectResponse
     {
         if ($category->products()->exists()) {
-            return back()->withErrors(['category' => 'Move or delete the products in this category first.']);
+            return back()->withErrors(['category' => 'Primero mueve o elimina los productos de esta categoría.']);
         }
 
         $category->delete();
 
-        return back()->with('success', 'Category deleted.');
+        return back()->with('success', 'Categoría eliminada correctamente.');
     }
 
     private function validated(Request $request, ?Category $category = null): array
