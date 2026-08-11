@@ -10,6 +10,37 @@ document.querySelectorAll('[data-confirm]').forEach((form) => {
     });
 });
 
+document.querySelectorAll('[data-repeatable-add]').forEach((button) => {
+    button.addEventListener('click', () => {
+        const list = document.querySelector(`[data-repeatable="${button.dataset.repeatableAdd}"]`);
+        const source = list?.querySelector('[data-repeatable-row]');
+        if (!list || !source || list.children.length >= 8) return;
+        const row = source.cloneNode(true);
+        const index = list.children.length;
+        row.querySelectorAll('input, select').forEach((field) => {
+            field.name = field.name.replace(/\[\d+\]|benefit_\d+/, (match) => match.startsWith('benefit_') ? `benefit_${index}` : `[${index}]`);
+            if (field.tagName === 'INPUT') field.value = '';
+            if (field.tagName === 'SELECT') field.value = '';
+        });
+        row.querySelectorAll('label').forEach((label) => { label.childNodes[0].textContent = label.childNodes[0].textContent.replace(/\d+/, index + 1); });
+        list.appendChild(row);
+    });
+});
+document.addEventListener('click', (event) => {
+    const button = event.target.closest('.repeatable-remove');
+    if (!button) return;
+    const list = button.closest('[data-repeatable]');
+    if (list?.children.length > 1) button.closest('[data-repeatable-row]')?.remove();
+});
+document.addEventListener('change', (event) => {
+    const select = event.target.closest('[data-media-select]');
+    if (!select) return;
+    const preview = select.closest('.media-selector')?.querySelector('.media-selector-preview');
+    if (!preview) return;
+    preview.src = select.selectedOptions[0]?.dataset.preview || '';
+    preview.hidden = !preview.src;
+});
+
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 const adminMenuToggle = document.querySelector('.admin-menu-toggle');
@@ -136,6 +167,9 @@ if (document.querySelector('.product-swiper')) {
         autoplay: reduceMotion || window.matchMedia('(max-width: 699px)').matches ? false : { delay: 5200, disableOnInteraction: true },
         pagination: { el: '.product-swiper .swiper-pagination', clickable: true },
     });
+}
+if (document.querySelector('.product-detail-swiper')) {
+    new Swiper('.product-detail-swiper', { modules: [Pagination, A11y], pagination: { el: '.product-detail-swiper .swiper-pagination', clickable: true } });
 }
 
 const revealItems = document.querySelectorAll('[data-reveal]');

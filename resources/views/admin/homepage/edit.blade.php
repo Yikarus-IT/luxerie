@@ -2,8 +2,13 @@
 @section('title', 'Página de inicio')
 @section('heading', 'Página de inicio')
 @section('content')
-<div class="admin-actions"><p>Edita el contenido principal y asigna imágenes desde la biblioteca de medios.</p><a class="button" href="{{ route('home') }}" target="_blank">Ver página ↗</a></div>
+<div class="admin-actions"><p>Edita el contenido principal y asigna imágenes desde la biblioteca de medios.</p><a class="button" href="{{ route('admin.homepage.preview') }}" target="_blank">Vista previa del borrador ↗</a></div>
 <form class="homepage-editor" method="POST" action="{{ route('admin.homepage.update') }}">@csrf @method('PUT')
+    <section class="form-panel"><div class="panel-heading"><div><p class="eyebrow">Organización</p><h2>Visibilidad y orden</h2></div></div><div class="section-control-grid">
+        @foreach(['hero' => 'Portada', 'about' => 'Introducción', 'benefits' => 'Beneficios', 'product' => 'Producto destacado', 'collection' => 'Catálogo', 'ritual' => 'Ritual', 'testimonial' => 'Testimonio'] as $key => $label)
+            <div class="section-control"><label class="check"><input type="checkbox" name="layout[{{ $key }}][visible]" value="1" @checked(old("layout.$key.visible", data_get($layout, "$key.visible")))> {{ $label }}</label><label>Orden<input type="number" min="0" max="100" name="layout[{{ $key }}][order]" value="{{ old("layout.$key.order", data_get($layout, "$key.order")) }}" required></label></div>
+        @endforeach
+    </div></section>
     <section class="form-panel"><div class="panel-heading"><div><p class="eyebrow">01</p><h2>Portada</h2></div></div><div class="form-grid">
         <label>Texto superior<input name="content[hero][eyebrow]" value="{{ old('content.hero.eyebrow', data_get($content, 'hero.eyebrow')) }}" required></label>
         @include('admin.homepage._media-select', ['label' => 'Imagen principal', 'slot' => 'hero'])
@@ -22,10 +27,14 @@
     <section class="form-panel"><div class="panel-heading"><div><p class="eyebrow">03</p><h2>Carrusel de beneficios</h2></div></div><div class="form-grid">
         <label>Texto superior<input name="content[benefits][eyebrow]" value="{{ old('content.benefits.eyebrow', data_get($content, 'benefits.eyebrow')) }}" required></label>
         <label class="span-2">Título<textarea name="content[benefits][heading]" rows="2" required>{{ old('content.benefits.heading', data_get($content, 'benefits.heading')) }}</textarea></label>
-        @foreach(range(0, 3) as $index)
+        <div class="span-2 repeatable-list" data-repeatable="benefits">
+        @foreach(data_get($content, 'benefits.captions') as $index => $caption)
+            <div class="repeatable-row" data-repeatable-row>
             @include('admin.homepage._media-select', ['label' => 'Imagen '.($index + 1), 'slot' => 'benefit_'.$index])
-            <label>Leyenda {{ $index + 1 }}<input name="content[benefits][captions][{{ $index }}]" value="{{ old('content.benefits.captions.'.$index, data_get($content, 'benefits.captions.'.$index)) }}" required></label>
+            <label>Leyenda {{ $index + 1 }}<input name="content[benefits][captions][{{ $index }}]" value="{{ old('content.benefits.captions.'.$index, $caption) }}" required></label>
+            <button class="text-link repeatable-remove" type="button">Quitar</button></div>
         @endforeach
+        </div><button class="button button-small span-2" type="button" data-repeatable-add="benefits">Agregar diapositiva</button>
     </div></section>
 
     <section class="form-panel"><div class="panel-heading"><div><p class="eyebrow">04</p><h2>Producto destacado</h2></div></div><div class="form-grid">
@@ -52,6 +61,9 @@
         <label>Descripción<textarea name="content[testimonial][body]" rows="3" required>{{ old('content.testimonial.body', data_get($content, 'testimonial.body')) }}</textarea></label>
         <label>Nota legal<textarea name="content[testimonial][note]" rows="3" required>{{ old('content.testimonial.note', data_get($content, 'testimonial.note')) }}</textarea></label>
     </div></section>
-    <div class="homepage-editor-actions"><button class="button button-dark" type="submit">Guardar página de inicio</button></div>
+    <section class="form-panel"><div class="panel-heading"><div><p class="eyebrow">Historial</p><h2>Revisiones publicadas</h2></div></div><div class="revision-list">@forelse($revisions as $revision)<div class="revision-row"><span><strong>{{ $revision->created_at->format('d/m/Y H:i') }}</strong><small>{{ $revision->user?->name ?? 'Sistema' }}</small></span><button class="button button-small" type="submit" form="restore-{{ $revision->id }}">Restaurar como borrador</button></div>@empty<p>Aún no existen revisiones anteriores.</p>@endforelse</div></section>
+    <div class="homepage-schedule"><label>Programar publicación<input type="datetime-local" name="scheduled_for" value="{{ old('scheduled_for', $homepage?->scheduled_for?->format('Y-m-d\TH:i')) }}"></label>@if($homepage?->scheduled_for)<small>Programada para {{ $homepage->scheduled_for->format('d/m/Y H:i') }}</small>@endif</div>
+    <div class="homepage-editor-actions"><button class="button" type="submit" name="action" value="draft">Guardar borrador</button><button class="button" type="submit" name="action" value="schedule">Programar</button><button class="button button-dark" type="submit" name="action" value="publish">Publicar cambios</button></div>
 </form>
+@foreach($revisions as $revision)<form id="restore-{{ $revision->id }}" method="POST" action="{{ route('admin.homepage.revisions.restore', $revision) }}">@csrf</form>@endforeach
 @endsection

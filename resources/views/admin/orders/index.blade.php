@@ -1,0 +1,6 @@
+@extends('layouts.admin')
+@section('title', 'Pedidos') @section('heading', 'Pedidos')
+@section('content')
+<section class="form-panel"><form class="admin-filter" method="GET"><label>Estado<select name="status"><option value="">Todos</option>@foreach(['pending_payment'=>'Pendiente de pago','paid'=>'Pagado','processing'=>'Preparando','shipped'=>'Enviado','delivered'=>'Entregado','canceled'=>'Cancelado'] as $value=>$label)<option value="{{ $value }}" @selected(request('status')===$value)>{{ $label }}</option>@endforeach</select></label><button class="button button-dark" type="submit">Filtrar</button></form></section>
+<section class="form-panel"><div class="table-wrap"><table class="admin-table"><thead><tr><th>Pedido</th><th>Cliente</th><th>Estado</th><th>Pago</th><th>Total</th><th>Fecha</th></tr></thead><tbody>@forelse($orders as $order)<tr><td><a class="text-link" href="{{ route('admin.orders.show',$order) }}">{{ $order->number }}</a></td><td>{{ $order->customer_name }}<br><small>{{ $order->customer_email }}</small></td><td>{{ $order->status }}</td><td>{{ $order->payment_status }}</td><td>${{ number_format($order->total,2) }} {{ $order->currency }}</td><td>{{ $order->created_at->format('d/m/Y H:i') }}</td></tr>@empty<tr><td colspan="6">Aún no hay pedidos.</td></tr>@endforelse</tbody></table></div>{{ $orders->links() }}</section>
+@endsection

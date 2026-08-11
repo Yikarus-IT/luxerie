@@ -1,6 +1,6 @@
 <article class="product-card">
     <a class="product-image" href="{{ route('products.show', $product) }}">
-        <img src="{{ $product->image_url ?: asset('images/brand/product-cutout.jpeg') }}" alt="{{ $product->name }}" loading="lazy">
+        <img src="{{ $product->displayImageUrl() }}" alt="{{ $product->displayImageAlt() }}" loading="lazy" style="object-position:{{ $product->displayFocalPoint() }}">
         @if($product->is_featured)<span class="badge">Destacado</span>@endif
     </a>
     <div class="product-card-copy">
