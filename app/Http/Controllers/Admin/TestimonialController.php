@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\ActivityLog;
 use App\Models\MediaAsset;
 use App\Models\Testimonial;
 use Illuminate\Http\RedirectResponse;
@@ -20,7 +19,6 @@ class TestimonialController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $item = Testimonial::create($this->validated($request));
-        ActivityLog::record('created', $item, 'Creó un testimonio.');
 
         return back()->with('success', 'Testimonio creado.');
     }
@@ -28,7 +26,6 @@ class TestimonialController extends Controller
     public function update(Request $request, Testimonial $testimonial): RedirectResponse
     {
         $testimonial->update($this->validated($request));
-        ActivityLog::record('updated', $testimonial, 'Actualizó un testimonio.');
 
         return back()->with('success', 'Testimonio actualizado.');
     }

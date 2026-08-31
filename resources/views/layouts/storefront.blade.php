@@ -8,7 +8,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="storefront">
-    @if($siteSettings['announcement'])<div class="announcement">{{ $siteSettings['announcement'] }}</div>@endif
+    @if($siteSettings['announcement'])<div class="announcement" role="note">{{ $siteSettings['announcement'] }}</div>@endif
     <header class="site-header">
         <a class="wordmark" href="{{ route('home') }}">{{ $siteSettings['brand_name'] }}</a>
         <nav class="desktop-navigation" aria-label="Navegación principal">

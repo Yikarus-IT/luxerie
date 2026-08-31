@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\ActivityLog;
 use App\Models\Order;
 use App\Services\CheckoutService;
 use Illuminate\Http\RedirectResponse;
@@ -35,7 +34,6 @@ class OrderController extends Controller
             $order->update(['status' => $data['status']]);
             $order->statusHistory()->create(['user_id' => $request->user()->id, 'status' => $data['status'], 'comment' => $data['comment'], 'created_at' => now()]);
         }
-        ActivityLog::record('updated', $order, "Actualizó el pedido {$order->number} a {$data['status']}.");
 
         return back()->with('success', 'Estado del pedido actualizado.');
     }

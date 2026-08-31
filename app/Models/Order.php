@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Order extends Model
 {
-    protected $fillable = ['number', 'cart_id', 'checkout_token', 'status', 'payment_status', 'fulfillment_status', 'customer_name', 'customer_email', 'customer_phone', 'shipping_address_line_1', 'shipping_address_line_2', 'shipping_neighborhood', 'shipping_city', 'shipping_state', 'shipping_postal_code', 'shipping_country', 'customer_notes', 'subtotal', 'shipping_total', 'discount_total', 'total', 'currency', 'reserved_until', 'paid_at'];
+    protected $fillable = ['number', 'cart_id', 'customer_id', 'checkout_token', 'status', 'payment_status', 'fulfillment_status', 'customer_name', 'customer_email', 'customer_phone', 'shipping_address_line_1', 'shipping_address_line_2', 'shipping_neighborhood', 'shipping_city', 'shipping_state', 'shipping_postal_code', 'shipping_country', 'customer_notes', 'subtotal', 'shipping_total', 'discount_total', 'total', 'currency', 'reserved_until', 'paid_at'];
 
     protected function casts(): array
     {
@@ -18,6 +18,11 @@ class Order extends Model
     public function cart(): BelongsTo
     {
         return $this->belongsTo(Cart::class);
+    }
+
+    public function customer(): BelongsTo
+    {
+        return $this->belongsTo(Customer::class);
     }
 
     public function items(): HasMany

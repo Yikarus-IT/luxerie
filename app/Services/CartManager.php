@@ -45,7 +45,7 @@ class CartManager
     {
         $subtotal = $cart->subtotal();
         $settings = SiteSetting::resolved();
-        $shipping = $subtotal >= (float) $settings['free_shipping_threshold'] ? 0 : (float) $settings['standard_shipping_cost'];
+        $shipping = (float) $settings['standard_shipping_cost'];
 
         return ['subtotal' => $subtotal, 'shipping' => $shipping, 'total' => $subtotal + $shipping];
     }

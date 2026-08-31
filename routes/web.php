@@ -1,17 +1,13 @@
 <?php
 
-use App\Http\Controllers\Admin\ActivityController;
-use App\Http\Controllers\Admin\CategoryController;
-use App\Http\Controllers\Admin\ContentPageController;
+use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\DashboardController;
-use App\Http\Controllers\Admin\FaqController;
 use App\Http\Controllers\Admin\HomepageController;
 use App\Http\Controllers\Admin\MediaAssetController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\TestimonialController;
-use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
@@ -22,8 +18,6 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [StorefrontController::class, 'home'])->name('home');
 Route::get('/shop', [StorefrontController::class, 'shop'])->name('shop');
 Route::get('/shop/{product:slug}', [StorefrontController::class, 'show'])->name('products.show');
-Route::get('/paginas/{page:slug}', [StorefrontController::class, 'page'])->name('pages.show');
-Route::get('/preguntas-frecuentes', [StorefrontController::class, 'faqs'])->name('faqs');
 Route::get('/carrito', [CartController::class, 'index'])->name('cart.index');
 Route::post('/carrito/{product}', [CartController::class, 'store'])->name('cart.store');
 Route::patch('/carrito/items/{cartItem}', [CartController::class, 'update'])->name('cart.update');
@@ -46,7 +40,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::get('/', DashboardController::class)->name('dashboard');
     Route::resource('products', ProductController::class)->except('show')->middleware('manage:products');
     Route::resource('orders', OrderController::class)->only(['index', 'show', 'update'])->middleware('manage:orders');
-    Route::resource('categories', CategoryController::class)->except(['show', 'create', 'edit'])->middleware('manage:products');
+    Route::resource('customers', CustomerController::class)->middleware('manage:orders');
     Route::resource('media', MediaAssetController::class)->only(['index', 'store', 'update', 'destroy'])->middleware('manage:media');
     Route::get('homepage', [HomepageController::class, 'edit'])->name('homepage.edit')->middleware('manage:content');
     Route::put('homepage', [HomepageController::class, 'update'])->name('homepage.update')->middleware('manage:content');
@@ -54,9 +48,5 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::post('homepage/revisions/{revision}/restore', [HomepageController::class, 'restore'])->name('homepage.revisions.restore')->middleware('manage:content');
     Route::get('settings', [SettingsController::class, 'edit'])->name('settings.edit')->middleware('manage:content');
     Route::put('settings', [SettingsController::class, 'update'])->name('settings.update')->middleware('manage:content');
-    Route::resource('pages', ContentPageController::class)->except('show')->middleware('manage:content');
-    Route::resource('faqs', FaqController::class)->only(['index', 'store', 'update', 'destroy'])->middleware('manage:content');
     Route::resource('testimonials', TestimonialController::class)->only(['index', 'store', 'update', 'destroy'])->middleware('manage:content');
-    Route::resource('users', UserController::class)->only(['index', 'store', 'update', 'destroy']);
-    Route::get('activity', ActivityController::class)->name('activity.index');
 });

@@ -1,0 +1,8 @@
+@extends('layouts.admin')
+@section('title', 'Cliente')
+@section('heading', 'Detalle de cliente')
+@section('content')
+<div class="admin-actions"><a class="button" href="{{ route('admin.customers.index') }}">← Volver a clientes</a><a class="button button-dark" href="{{ route('admin.customers.edit', $customer) }}">Editar cliente</a></div>
+<section class="admin-panel"><div class="panel-heading"><h2>Información del cliente</h2></div><div class="management-grid"><div class="form-panel"><label>Nombre</label><p>{{ $customer->name }}</p><label>Email</label><p>{{ $customer->email }}</p><label>Teléfono</label><p>{{ $customer->phone ?? '—' }}</p><label>Notas</label><p>{{ $customer->notes ?? 'Sin notas' }}</p></div><div class="form-panel"><label>Pedidos totales</label><p>{{ $customer->orders_count }}</p><label>Total gastado</label><p>${{ number_format($customer->total_spent, 2) }}</p></div></div></section>
+<section class="admin-panel"><div class="panel-heading"><h2>Historial de pedidos</h2></div>@if($customer->orders->count() > 0)<div class="table-wrap"><table><thead><tr><th>Pedido</th><th>Fecha</th><th>Total</th><th>Estado</th><th></th></tr></thead><tbody>@foreach($customer->orders as $order)<tr><td data-label="Pedido"><strong>{{ $order->number }}</strong></td><td data-label="Fecha">{{ $order->created_at->format('d/m/Y') }}</td><td data-label="Total">${{ number_format($order->total, 2) }}</td><td data-label="Estado"><span class="status">{{ $order->status }}</span></td><td class="row-actions" data-label="Acciones"><a href="{{ route('admin.orders.show', $order) }}">Ver</a></td></tr>@endforeach</tbody></table></div>@else<p>Este cliente aún no tiene pedidos.</p>@endif</section>
+@endsection

@@ -3,9 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\ActivityLog;
 use App\Models\HomepageContent;
-use App\Models\HomepageRevision;
 use App\Models\MediaAsset;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -22,7 +20,6 @@ class HomepageController extends Controller
             'selectedMedia' => $homepage?->media ?? [],
             'layout' => $homepage?->resolvedLayout() ?? HomepageContent::defaultLayout(),
             'homepage' => $homepage,
-            'revisions' => HomepageRevision::with('user')->latest('id')->take(10)->get(),
             'mediaAssets' => MediaAsset::with('media')->latest()->get(),
         ]);
     }
@@ -78,9 +75,6 @@ class HomepageController extends Controller
         ]);
 
         if ($validated['action'] === 'publish') {
-            if ($homepage->published_content) {
-                HomepageRevision::create(['content' => $homepage->published_content, 'media' => $homepage->published_media, 'layout' => $homepage->published_layout, 'user_id' => $request->user()->id, 'created_at' => now()]);
-            }
             $homepage->published_content = $validated['content'];
             $homepage->published_media = array_filter($validated['media'] ?? []);
             $homepage->published_layout = $layout;
@@ -96,18 +90,7 @@ class HomepageController extends Controller
             $homepage->scheduled_for = $validated['scheduled_for'];
         }
         $homepage->save();
-        $messages = ['publish' => 'Publicó la página de inicio.', 'schedule' => 'Programó la página de inicio.', 'draft' => 'Guardó un borrador de la página de inicio.'];
-        ActivityLog::record($validated['action'] === 'draft' ? 'updated' : $validated['action'].'d', $homepage, $messages[$validated['action']]);
 
         return back()->with('success', ['publish' => 'Página de inicio publicada.', 'schedule' => 'Publicación programada.', 'draft' => 'Borrador guardado.'][$validated['action']]);
-    }
-
-    public function restore(HomepageRevision $revision): RedirectResponse
-    {
-        $homepage = HomepageContent::firstOrFail();
-        $homepage->update(['content' => $revision->content, 'media' => $revision->media, 'layout' => $revision->layout, 'updated_by' => auth()->id()]);
-        ActivityLog::record('restored', $homepage, "Restauró la revisión {$revision->id} como borrador.");
-
-        return back()->with('success', 'Revisión restaurada como borrador. Revísala antes de publicar.');
     }
 }
