@@ -16,8 +16,20 @@ use App\Http\Controllers\StorefrontController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [StorefrontController::class, 'home'])->name('home');
-Route::get('/shop', [StorefrontController::class, 'shop'])->name('shop');
-Route::get('/shop/{product:slug}', [StorefrontController::class, 'show'])->name('products.show');
+Route::get('/tienda', [StorefrontController::class, 'shop'])->name('shop');
+Route::get('/producto/{product:slug}', [StorefrontController::class, 'product'])->name('product.show');
+Route::get('/sitemap.xml', function () {
+    $products = App\Models\Product::where('is_active', true)->get();
+    $content = '<?xml version="1.0" encoding="UTF-8"?>';
+    $content .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
+    $content .= '<url><loc>'.route('home').'</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>';
+    $content .= '<url><loc>'.route('shop').'</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>';
+    foreach ($products as $product) {
+        $content .= '<url><loc>'.route('product.show', $product).'</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>';
+    }
+    $content .= '</urlset>';
+    return response($content, 200)->header('Content-Type', 'application/xml');
+})->name('sitemap');
 Route::get('/carrito', [CartController::class, 'index'])->name('cart.index');
 Route::post('/carrito/{product}', [CartController::class, 'store'])->name('cart.store');
 Route::patch('/carrito/items/{cartItem}', [CartController::class, 'update'])->name('cart.update');

@@ -2,15 +2,32 @@
 
 @section('title', $product->seo_title ?: $product->name.' — Luxérie')
 @section('meta_description', $product->seo_description ?: $product->short_description)
+@section('og_image', $product->displayImageUrl())
 
 @section('content')
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Product",
+  "name": "{{ $product->name }}",
+  "description": "{{ $product->short_description }}",
+  "image": "{{ $product->displayImageUrl() }}",
+  "sku": "{{ $product->sku }}",
+  "offers": {
+    "@type": "Offer",
+    "price": "{{ $product->price }}",
+    "priceCurrency": "MXN",
+    "availability": "{{ $product->stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock' }}",
+    "url": "{{ route('product.show', $product) }}"
+  }
+}
+</script>
 <section class="product-detail">
     <div class="product-detail-image">
-        @if($productGallery->isNotEmpty())<div class="swiper product-detail-swiper"><div class="swiper-wrapper"><div class="swiper-slide"><img src="{{ $product->displayImageUrl() }}" alt="{{ $product->displayImageAlt() }}" fetchpriority="high" style="object-position:{{ $product->displayFocalPoint() }}"></div>@foreach($productGallery as $galleryImage)<div class="swiper-slide"><img src="{{ $galleryImage->image()?->getUrl() }}" alt="{{ $galleryImage->alt_text }}" loading="lazy" style="object-position:{{ $galleryImage->focal_x }}% {{ $galleryImage->focal_y }}%"></div>@endforeach</div><div class="swiper-pagination"></div></div>@else<img src="{{ $product->displayImageUrl() }}" alt="{{ $product->displayImageAlt() }}" fetchpriority="high" style="object-position:{{ $product->displayFocalPoint() }}">@endif
+        @if($productGallery->isNotEmpty())<div class="swiper product-detail-swiper"><div class="swiper-wrapper"><div class="swiper-slide"><img src="{{ $product->displayImageUrl() }}" alt="{{ $product->displayImageAlt() }}" fetchpriority="high"></div>@foreach($productGallery as $galleryImage)<div class="swiper-slide"><img src="{{ $galleryImage->image()?->getUrl() }}" alt="{{ $galleryImage->alt_text }}" loading="lazy"></div>@endforeach</div><div class="swiper-pagination"></div></div>@else<img src="{{ $product->displayImageUrl() }}" alt="{{ $product->displayImageAlt() }}" fetchpriority="high">@endif
     </div>
     <div class="product-detail-copy">
         <a class="product-back-link text-link" href="{{ route('shop') }}">← Volver a la tienda</a>
-        <p class="eyebrow">{{ $product->category->name }}</p>
         <h1>{{ $product->name }}</h1>
         <div class="product-price-row">
             <p class="price">${{ number_format($product->price, 2) }} MXN</p>

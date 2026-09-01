@@ -4,7 +4,25 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="@yield('meta_description', $siteSettings['seo_description'])">
+    <meta name="robots" content="index,follow">
+    <link rel="canonical" href="{{ request()->url() }}">
     <title>@yield('title', $siteSettings['seo_title'])</title>
+    
+    {{-- Open Graph / Facebook --}}
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ request()->url() }}">
+    <meta property="og:title" content="@yield('title', $siteSettings['seo_title'])">
+    <meta property="og:description" content="@yield('meta_description', $siteSettings['seo_description'])">
+    <meta property="og:image" content="@yield('og_image', asset('images/og-default.jpg'))">
+    <meta property="og:locale" content="es_MX">
+    
+    {{-- Twitter --}}
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="{{ request()->url() }}">
+    <meta name="twitter:title" content="@yield('title', $siteSettings['seo_title'])">
+    <meta name="twitter:description" content="@yield('meta_description', $siteSettings['seo_description'])">
+    <meta name="twitter:image" content="@yield('og_image', asset('images/og-default.jpg'))">
+    
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="storefront">
