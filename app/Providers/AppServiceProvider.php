@@ -2,6 +2,10 @@
 
 namespace App\Providers;
 
+use App\Models\ContentPage;
+use App\Models\SiteSetting;
+use App\Services\CartManager;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -19,6 +23,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        View::composer('layouts.storefront', function ($view): void {
+            $view->with('siteSettings', SiteSetting::resolved())
+                ->with('footerPages', ContentPage::where('is_active', true)->orderBy('title')->get())
+                ->with('cartItemCount', app(CartManager::class)->current(request(), false)?->itemCount() ?? 0);
+        });
     }
 }

@@ -1,6 +1,0 @@
-@extends('layouts.admin')
-@section('title', 'Categories')
-@section('heading', 'Categories')
-@section('content')
-<div class="category-layout"><form class="form-panel compact-form" method="POST" action="{{ route('admin.categories.store') }}">@csrf<p class="eyebrow">New collection</p><h2>Add a category</h2><label>Name<input name="name" required></label><label>Slug<input name="slug" placeholder="Generated from name"></label><label>Description<textarea name="description" rows="4"></textarea></label><label class="check"><input type="checkbox" name="is_active" value="1" checked> Visible</label><button class="button button-dark button-full" type="submit">Add category</button></form><section class="admin-panel"><div class="panel-heading"><div><p class="eyebrow">Catalog structure</p><h2>Existing categories</h2></div></div>@foreach($categories as $category)<form class="category-row" method="POST" action="{{ route('admin.categories.update', $category) }}">@csrf @method('PUT')<input name="name" value="{{ $category->name }}"><input name="slug" value="{{ $category->slug }}"><span>{{ $category->products_count }} products</span><label class="check"><input type="checkbox" name="is_active" value="1" @checked($category->is_active)> Visible</label><button type="submit">Save</button></form>@endforeach</section></div>
-@endsection

@@ -20,14 +20,14 @@ class AuthController extends Controller
         $credentials = $request->validate(['email' => ['required', 'email'], 'password' => ['required', 'string']]);
 
         if (! Auth::attempt($credentials, $request->boolean('remember'))) {
-            throw ValidationException::withMessages(['email' => 'The provided credentials do not match our records.']);
+            throw ValidationException::withMessages(['email' => 'Las credenciales proporcionadas no coinciden con nuestros registros.']);
         }
 
         $request->session()->regenerate();
 
         if (! $request->user()->is_admin) {
             Auth::logout();
-            throw ValidationException::withMessages(['email' => 'This account does not have administrator access.']);
+            throw ValidationException::withMessages(['email' => 'Esta cuenta no tiene acceso de administrador.']);
         }
 
         return redirect()->intended(route('admin.dashboard'));

@@ -1,6 +1,9 @@
 *.log
 .DS_Store
 .env
+.env.testing
+.env.staging
+.env.local
 .env.backup
 .env.production
 .phpactor.json
@@ -20,6 +23,7 @@
 /public/storage
 /storage/*.key
 /storage/pail
+/database/backups/
 /vendor
 _ide_helper.php
 Homestead.json

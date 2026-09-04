@@ -28,14 +28,14 @@ class ExampleTest extends TestCase
     {
         $admin = User::factory()->create(['is_admin' => true]);
 
-        $this->actingAs($admin)->get('/admin')->assertOk()->assertSee('Good morning.');
+        $this->actingAs($admin)->get('/admin')->assertOk()->assertSee('Buenos días.');
     }
 
     public function test_published_products_appear_in_the_shop(): void
     {
-        $category = Category::create(['name' => 'Face', 'slug' => 'face', 'is_active' => true]);
-        Product::create(['category_id' => $category->id, 'name' => 'Test Cream', 'slug' => 'test-cream', 'sku' => 'TEST-1', 'short_description' => 'A test product.', 'price' => 500, 'stock' => 5, 'is_active' => true]);
+        $category = Category::create(['name' => 'Rostro', 'slug' => 'rostro', 'is_active' => true]);
+        Product::create(['category_id' => $category->id, 'name' => 'Crema de prueba', 'slug' => 'crema-de-prueba', 'sku' => 'TEST-1', 'short_description' => 'Un producto de prueba.', 'price' => 500, 'stock' => 5, 'is_active' => true]);
 
-        $this->get('/shop')->assertOk()->assertSee('Test Cream');
+        $this->get('/shop')->assertOk()->assertSee('Crema de prueba');
     }
 }
