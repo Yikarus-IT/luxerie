@@ -1,0 +1,10 @@
+@extends('layouts.storefront')
+@section('title', 'Carrito — Luxérie')
+@section('content')
+<section class="commerce-page"><div class="commerce-heading"><p class="eyebrow">Tu selección</p><h1>Carrito</h1></div>
+@if(session('success'))<div class="notice success">{{ session('success') }}</div>@endif
+@if($errors->any())<div class="notice error">{{ $errors->first() }}</div>@endif
+@if($cart->items->isEmpty())<div class="empty-state"><h2>Tu carrito está vacío</h2><p>Descubre el ritual Luxérie y agrega tu producto.</p><a class="button button-dark" href="{{ route('shop') }}">Ir a la tienda</a></div>
+@else<div class="commerce-layout"><div class="cart-items">@foreach($cart->items as $item)<article class="cart-item"><img src="{{ $item->product->displayImageUrl() }}" alt="{{ $item->product->displayImageAlt() }}"><div><p class="eyebrow">{{ $item->product->category->name }}</p><h2>{{ $item->product->name }}</h2><p>${{ number_format($item->unit_price, 2) }} MXN</p></div><div class="cart-item-actions"><form method="POST" action="{{ route('cart.update', $item) }}">@csrf @method('PATCH')<label>Cantidad<input type="number" name="quantity" min="1" max="{{ $item->product->stock }}" value="{{ $item->quantity }}"><button class="text-link" type="submit">Actualizar</button></label></form><form method="POST" action="{{ route('cart.destroy', $item) }}">@csrf @method('DELETE')<button class="text-link" type="submit">Eliminar</button></form></div></article>@endforeach</div>
+<aside class="order-summary"><h2>Resumen</h2><p><span>Subtotal</span><strong>${{ number_format($totals['subtotal'], 2) }}</strong></p><p><span>Envío</span><strong>{{ $totals['shipping'] ? '$'.number_format($totals['shipping'], 2) : 'Gratis' }}</strong></p><p class="order-total"><span>Total</span><strong>${{ number_format($totals['total'], 2) }} MXN</strong></p><a class="button button-dark button-full" href="{{ route('checkout.create') }}">Continuar al checkout</a><a class="text-link" href="{{ route('shop') }}">Seguir comprando</a></aside></div>@endif</section>
+@endsection

@@ -30,4 +30,9 @@ class User extends Authenticatable
             'is_admin' => 'boolean',
         ];
     }
+
+    public function canManage(string $area): bool
+    {
+        return $this->is_admin;
+    }
 }
