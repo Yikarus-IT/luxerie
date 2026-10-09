@@ -144,6 +144,17 @@
 .luxerie-banner-motion-2.is-visible img{transform:translateX(0) scale(1)}
 .luxerie-banner-motion-3 img{transform:translateY(1.5%) scale(1.02);transition:transform 1.4s cubic-bezier(.2,.7,.2,1)}
 .luxerie-banner-motion-3.is-visible img{transform:translateY(0) scale(1)}
+.marketplace-section{padding:clamp(72px,9vw,125px) var(--page-gutter);background:#f0e5dc}
+.marketplace-heading{margin-bottom:clamp(30px,4vw,52px)}
+.marketplace-heading h2{margin:0;max-width:720px;font:400 clamp(38px,5vw,68px)/1.05 var(--serif);letter-spacing:-.04em}
+.marketplace-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(16px,3vw,32px)}
+.marketplace-card{min-height:clamp(220px,25vw,360px);padding:clamp(28px,5vw,64px);display:flex;flex-direction:column;justify-content:space-between;border:1px solid rgba(36,26,32,.12);transition:transform .4s ease,box-shadow .4s ease}
+.marketplace-card:hover{transform:translateY(-7px);box-shadow:0 24px 50px rgba(73,39,49,.14)}
+.marketplace-card-ml{background:linear-gradient(135deg,#ffe600,#fff2a6);color:#241a20}
+.marketplace-card-amazon{background:linear-gradient(135deg,#241a20,#54283c);color:#fff}
+.marketplace-name{font:400 clamp(38px,5vw,72px)/1 var(--serif);letter-spacing:-.05em}
+.marketplace-action{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase}
+.marketplace-action span{font-size:18px;margin-left:8px}
 .luxerie-purchase{display:flex;align-items:center;justify-content:space-between;gap:40px;padding:clamp(58px,8vw,110px) var(--page-gutter);background:var(--ink);color:white}
 .luxerie-purchase h1{margin:0 0 16px;font:400 clamp(44px,6vw,78px)/1 var(--serif);letter-spacing:-.05em}
 .luxerie-purchase p:not(.eyebrow){max-width:520px;margin:0;color:#d8ccd1;font-size:clamp(16px,1.4vw,19px)}
@@ -151,5 +162,6 @@
 .luxerie-purchase .button{flex:0 0 auto}
 .luxerie-collection{background:var(--paper)}
 @media(max-width:700px){.luxerie-banner + .luxerie-banner{padding-top:10px}.luxerie-banner + .luxerie-purchase{margin-top:10px}.luxerie-purchase{align-items:stretch;flex-direction:column;padding-block:72px}.luxerie-purchase .button{width:100%}}
+@media(max-width:700px){.marketplace-grid{grid-template-columns:1fr}.marketplace-card{min-height:210px}.marketplace-card:hover{transform:none}}
 @media(max-width:700px){.luxerie-statement{text-align:left}.luxerie-statement h2{margin-left:0}.luxerie-statement>p:last-child{margin-left:0}}
 @media(prefers-reduced-motion:reduce){.luxerie-banner img,.luxerie-banner-motion-1{transition:none;transform:none;clip-path:none}.luxerie-banner-motion-0.is-visible img,.luxerie-banner-motion-2.is-visible img,.luxerie-banner-motion-3.is-visible img{transform:none}}
