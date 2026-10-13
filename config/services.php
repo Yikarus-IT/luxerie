@@ -42,4 +42,9 @@ return [
         'webhook_secret' => env('MERCADO_PAGO_WEBHOOK_SECRET'),
     ],
 
+    'order_notifications' => [
+        'enabled' => filter_var(env('ORDER_NOTIFICATION_ENABLED', false), FILTER_VALIDATE_BOOL),
+        'recipient' => env('ORDER_NOTIFICATION_EMAIL'),
+    ],
+
 ];

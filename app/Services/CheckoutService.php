@@ -11,7 +11,7 @@ use Illuminate\Validation\ValidationException;
 
 class CheckoutService
 {
-    public function __construct(private readonly CartManager $carts) {}
+    public function __construct(private readonly CartManager $carts, private readonly OrderNotificationService $notifications) {}
 
     public function createOrder(Cart $cart, array $customer, string $checkoutToken): Order
     {
@@ -24,14 +24,14 @@ class CheckoutService
             throw ValidationException::withMessages(['cart' => 'Tu carrito está vacío.']);
         }
 
-        return DB::transaction(function () use ($cart, $customer, $checkoutToken) {
+        $order = DB::transaction(function () use ($cart, $customer, $checkoutToken) {
             $lockedProducts = Product::whereIn('id', $cart->items->pluck('product_id'))->lockForUpdate()->get()->keyBy('id');
             foreach ($cart->items as $item) {
                 $product = $lockedProducts->get($item->product_id);
                 if (! $product?->is_active || $product->stock < $item->quantity) {
                     throw ValidationException::withMessages(['cart' => "No hay suficientes existencias de {$item->product?->name}."]);
                 }
-                $item->update(['unit_price' => $product->price]);
+                $item->update(['unit_price' => $product->unitPriceForQuantity($item->quantity)]);
             }
 
             $cart->refresh()->load('items.product.primaryMedia.media');
@@ -42,7 +42,7 @@ class CheckoutService
             foreach ($cart->items as $item) {
                 $product = $lockedProducts[$item->product_id];
                 $product->decrement('stock', $item->quantity);
-                $order->items()->create(['product_id' => $product->id, 'sku' => $product->sku, 'name' => $product->name, 'size_label' => $product->size_label, 'quantity' => $item->quantity, 'unit_price' => $product->price, 'line_total' => (float) $product->price * $item->quantity, 'image_url' => $product->displayImageUrl()]);
+                $order->items()->create(['product_id' => $product->id, 'sku' => $product->sku, 'name' => $product->name, 'size_label' => $product->size_label, 'quantity' => $item->quantity, 'unit_price' => $item->unit_price, 'line_total' => (float) $item->unit_price * $item->quantity, 'image_url' => $product->displayImageUrl()]);
                 $order->reservations()->create(['product_id' => $product->id, 'quantity' => $item->quantity, 'status' => 'active', 'expires_at' => $reservedUntil]);
             }
 
@@ -52,6 +52,7 @@ class CheckoutService
 
             return $order->load('items', 'paymentAttempts');
         });
+        return $order;
     }
 
     public function release(Order $order, string $reason = 'Reserva liberada.'): void
@@ -69,16 +70,25 @@ class CheckoutService
 
     public function markPaid(Order $order, ?string $comment = null): void
     {
-        DB::transaction(function () use ($order, $comment) {
+        if ($order->payment_status === 'paid') {
+            return;
+        }
+
+        $markedPaid = DB::transaction(function () use ($order, $comment): bool {
             $lockedOrder = Order::whereKey($order->id)->lockForUpdate()->firstOrFail();
             if ($lockedOrder->payment_status === 'paid') {
-                return;
+                return false;
             }
 
             $lockedOrder->reservations()->where('status', 'active')->update(['status' => 'committed']);
             $lockedOrder->update(['status' => 'paid', 'payment_status' => 'paid', 'paid_at' => now(), 'reserved_until' => null]);
             $lockedOrder->statusHistory()->create(['user_id' => auth()->id(), 'status' => 'paid', 'comment' => $comment ?: 'Pago confirmado.', 'created_at' => now()]);
+            return true;
         });
+
+        if ($markedPaid) {
+            $this->notifications->paid($order->fresh('items'));
+        }
     }
 
     public function releaseExpired(): int

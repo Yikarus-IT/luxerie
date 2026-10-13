@@ -7,6 +7,7 @@ use App\Models\HomepageContent;
 use App\Models\MediaAsset;
 use App\Models\Product;
 use App\Models\Testimonial;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
 class StorefrontController extends Controller
@@ -57,11 +58,13 @@ class StorefrontController extends Controller
         return view('storefront.faqs', ['faqs' => collect()]);
     }
 
-    public function shop(): View
+    public function shop(): View|RedirectResponse
     {
-        return view('storefront.shop', [
-            'products' => Product::published()->with(['category', 'primaryMedia.media'])->latest()->paginate(9),
-        ]);
+        $product = Product::published()->with(['category', 'primaryMedia.media'])->latest()->first();
+
+        return $product
+            ? redirect()->route('product.show', $product)
+            : view('storefront.shop', ['products' => Product::published()->with(['category', 'primaryMedia.media'])->latest()->paginate(9)]);
     }
 
     public function show(Product $product): View

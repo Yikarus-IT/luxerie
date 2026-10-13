@@ -11,10 +11,10 @@ use Illuminate\View\View;
 
 class CustomerController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
         return view('admin.customers.index', [
-            'customers' => Customer::withCount('orders')->latest()->paginate(20),
+            'customers' => Customer::withCount('orders')->when($request->filled('search'), fn ($query) => $query->where(fn ($search) => $search->where('name', 'like', '%'.$request->string('search').'%')->orWhere('email', 'like', '%'.$request->string('search').'%')->orWhere('phone', 'like', '%'.$request->string('search').'%')))->latest()->paginate(20)->withQueryString(),
         ]);
     }
 

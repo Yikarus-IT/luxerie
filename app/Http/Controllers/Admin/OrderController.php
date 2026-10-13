@@ -13,7 +13,11 @@ class OrderController extends Controller
 {
     public function index(Request $request): View
     {
-        $orders = Order::query()->when($request->filled('status'), fn ($q) => $q->where('status', $request->string('status')))->latest()->paginate(20)->withQueryString();
+        $orders = Order::query()
+            ->when($request->filled('status'), fn ($query) => $query->where('status', $request->string('status')))
+            ->when($request->filled('payment'), fn ($query) => $query->where('payment_status', $request->string('payment')))
+            ->when($request->filled('search'), fn ($query) => $query->where(fn ($search) => $search->where('number', 'like', '%'.$request->string('search').'%')->orWhere('customer_name', 'like', '%'.$request->string('search').'%')->orWhere('customer_email', 'like', '%'.$request->string('search').'%')))
+            ->latest()->paginate(20)->withQueryString();
 
         return view('admin.orders.index', compact('orders'));
     }

@@ -15,7 +15,7 @@ class SiteSetting extends Model
 
     public static function defaults(): array
     {
-        return ['brand_name' => 'Luxérie', 'tagline' => 'Belleza, con intención.', 'announcement' => 'No hay devolución por ser un producto higiénico', 'email' => 'sabinorendon1959@gmail.com', 'phone' => '', 'instagram' => '', 'facebook' => '', 'seo_title' => 'Luxérie', 'seo_description' => 'Cuidado consciente para tus rituales diarios.', 'standard_shipping_cost' => 99];
+        return ['brand_name' => 'Luxérie', 'tagline' => 'Belleza, con intención.', 'announcement' => 'No hay devolución por ser un producto higiénico', 'email' => 'sabinorendon1959@gmail.com', 'phone' => '', 'instagram' => '', 'facebook' => '', 'seo_title' => 'Luxérie', 'seo_description' => 'Cuidado consciente para tus rituales diarios.', 'standard_shipping_cost' => 0];
     }
 
     public static function resolved(): array

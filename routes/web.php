@@ -11,6 +11,9 @@ use App\Http\Controllers\Admin\TestimonialController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\CustomerAccountController;
+use App\Http\Controllers\CustomerAddressController;
+use App\Http\Controllers\CustomerAuthController;
 use App\Http\Controllers\MercadoPagoController;
 use App\Http\Controllers\StorefrontController;
 use Illuminate\Support\Facades\Route;
@@ -42,6 +45,28 @@ Route::post('/pedido/{order:checkout_token}/pagar', [MercadoPagoController::clas
 Route::get('/pedido/{order:checkout_token}/resultado', [MercadoPagoController::class, 'result'])->name('payments.result');
 Route::post('/mercado-pago/webhook', [MercadoPagoController::class, 'webhook'])->name('payments.webhook');
 
+Route::middleware('guest:customer')->prefix('cuenta')->name('customer.')->group(function (): void {
+    Route::get('/registro', [CustomerAuthController::class, 'create'])->name('register');
+    Route::post('/registro', [CustomerAuthController::class, 'store'])->name('register.store');
+    Route::get('/iniciar-sesion', [CustomerAuthController::class, 'loginForm'])->name('login');
+    Route::post('/iniciar-sesion', [CustomerAuthController::class, 'login'])->name('login.store');
+    Route::get('/recuperar-contrasena', [CustomerAuthController::class, 'forgotPasswordForm'])->name('password.request');
+    Route::post('/recuperar-contrasena', [CustomerAuthController::class, 'sendResetLink'])->name('password.email');
+    Route::get('/restablecer-contrasena/{token}', [CustomerAuthController::class, 'resetPasswordForm'])->name('password.reset');
+    Route::post('/restablecer-contrasena', [CustomerAuthController::class, 'resetPassword'])->name('password.update');
+});
+
+Route::post('/cuenta/cerrar-sesion', [CustomerAuthController::class, 'logout'])->middleware('auth:customer')->name('customer.logout');
+Route::middleware('auth:customer')->prefix('cuenta')->name('customer.')->group(function (): void {
+    Route::get('/', [CustomerAccountController::class, 'dashboard'])->name('account');
+    Route::get('/perfil', [CustomerAccountController::class, 'edit'])->name('profile.edit');
+    Route::put('/perfil', [CustomerAccountController::class, 'update'])->name('profile.update');
+    Route::get('/direcciones', [CustomerAddressController::class, 'index'])->name('addresses.index');
+    Route::post('/direcciones', [CustomerAddressController::class, 'store'])->name('addresses.store');
+    Route::patch('/direcciones/{address}/predeterminada', [CustomerAddressController::class, 'makeDefault'])->name('addresses.default');
+    Route::delete('/direcciones/{address}', [CustomerAddressController::class, 'destroy'])->name('addresses.destroy');
+});
+
 Route::middleware('guest')->group(function (): void {
     Route::get('/admin/login', [AuthController::class, 'create'])->name('login');
     Route::post('/admin/login', [AuthController::class, 'store'])->name('login.store');
@@ -52,6 +77,7 @@ Route::post('/admin/logout', [AuthController::class, 'destroy'])->middleware('au
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(function (): void {
     Route::get('/', DashboardController::class)->name('dashboard');
     Route::resource('products', ProductController::class)->except('show')->middleware('manage:products');
+    Route::patch('products/{product}/stock', [ProductController::class, 'adjustStock'])->name('products.stock.adjust')->middleware('manage:products');
     Route::resource('orders', OrderController::class)->only(['index', 'show', 'update'])->middleware('manage:orders');
     Route::resource('customers', CustomerController::class)->middleware('manage:orders');
     Route::resource('media', MediaAssetController::class)->only(['index', 'store', 'update', 'destroy'])->middleware('manage:media');

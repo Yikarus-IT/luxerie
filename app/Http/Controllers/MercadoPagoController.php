@@ -15,7 +15,7 @@ class MercadoPagoController extends Controller
 {
     public function pay(Request $request, Order $order, MercadoPagoService $mercadoPago): RedirectResponse
     {
-        abort_unless($request->session()->has('visible_orders.'.$order->checkout_token), 404);
+        abort_unless($request->session()->has('visible_orders.'.$order->checkout_token) || $request->user('customer')?->id === $order->customer_id, 404);
         abort_if($order->payment_status === 'paid' || $order->status === 'canceled', 422);
 
         try {

@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\MediaAsset;
 use App\Models\Product;
+use App\Models\InventoryAdjustment;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -37,7 +39,15 @@ class ProductController extends Controller
 
     public function update(Request $request, Product $product): RedirectResponse
     {
-        $product->update($this->validated($request, $product));
+        $data = $this->validated($request, $product);
+        DB::transaction(function () use ($request, $product, $data): void {
+            $lockedProduct = Product::whereKey($product->id)->lockForUpdate()->firstOrFail();
+            $before = $lockedProduct->stock;
+            $lockedProduct->update($data);
+            if ($before !== (int) $data['stock']) {
+                InventoryAdjustment::create(['product_id' => $lockedProduct->id, 'user_id' => $request->user()->id, 'quantity_change' => (int) $data['stock'] - $before, 'stock_before' => $before, 'stock_after' => (int) $data['stock'], 'reason' => 'Actualización desde la ficha del producto.']);
+            }
+        });
 
         return redirect()->route('admin.products.index')->with('success', 'Producto actualizado correctamente.');
     }
@@ -47,6 +57,22 @@ class ProductController extends Controller
         $product->delete();
 
         return back()->with('success', 'Producto eliminado correctamente.');
+    }
+
+    public function adjustStock(Request $request, Product $product): RedirectResponse
+    {
+        $data = $request->validate(['quantity_change' => ['required', 'integer', 'not_in:0', 'between:-99999,99999'], 'reason' => ['required', 'string', 'max:300']]);
+
+        DB::transaction(function () use ($request, $product, $data): void {
+            $lockedProduct = Product::whereKey($product->id)->lockForUpdate()->firstOrFail();
+            $before = $lockedProduct->stock;
+            $after = $before + $data['quantity_change'];
+            abort_if($after < 0, 422, 'El ajuste dejaría el inventario en un valor negativo.');
+            $lockedProduct->update(['stock' => $after]);
+            InventoryAdjustment::create(['product_id' => $lockedProduct->id, 'user_id' => $request->user()->id, 'quantity_change' => $data['quantity_change'], 'stock_before' => $before, 'stock_after' => $after, 'reason' => $data['reason']]);
+        });
+
+        return back()->with('success', 'Inventario actualizado y registrado.');
     }
 
     private function validated(Request $request, ?Product $product = null): array
@@ -65,6 +91,8 @@ class ProductController extends Controller
             'short_description' => ['required', 'string', 'max:240'],
             'description' => ['nullable', 'string'],
             'price' => ['required', 'numeric', 'min:0'],
+            'bulk_price' => ['nullable', 'numeric', 'min:0', 'lte:price'],
+            'bulk_min_quantity' => ['nullable', 'integer', 'min:2', 'required_with:bulk_price'],
             'compare_at_price' => ['nullable', 'numeric', 'gte:price'],
             'stock' => ['required', 'integer', 'min:0'],
             'size_label' => ['nullable', 'string', 'max:60'],

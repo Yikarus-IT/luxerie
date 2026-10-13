@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 #[Fillable([
     'category_id', 'name', 'slug', 'sku', 'short_description', 'description',
-    'price', 'compare_at_price', 'stock', 'size_label', 'image_url',
+    'price', 'bulk_price', 'bulk_min_quantity', 'compare_at_price', 'stock', 'size_label', 'image_url',
     'primary_media_id', 'gallery_media_ids', 'ingredients', 'directions', 'precautions', 'barcode',
     'weight_grams', 'package_length_cm', 'package_width_cm', 'package_height_cm', 'seo_title', 'seo_description',
     'amazon_asin', 'amazon_url', 'amazon_status', 'amazon_title', 'amazon_description',
@@ -22,11 +22,20 @@ class Product extends Model
     {
         return [
             'price' => 'decimal:2',
+            'bulk_price' => 'decimal:2',
+            'bulk_min_quantity' => 'integer',
             'compare_at_price' => 'decimal:2',
             'is_featured' => 'boolean',
             'is_active' => 'boolean',
             'gallery_media_ids' => 'array',
         ];
+    }
+
+    public function unitPriceForQuantity(int $quantity): float
+    {
+        return $this->bulk_price !== null && $this->bulk_min_quantity !== null && $quantity >= $this->bulk_min_quantity
+            ? (float) $this->bulk_price
+            : (float) $this->price;
     }
 
     public function category(): BelongsTo

@@ -44,4 +44,12 @@ class Order extends Model
     {
         return $this->hasMany(InventoryReservation::class);
     }
+
+    public function getStatusLabelAttribute(): string
+    {
+        return match ($this->status) {
+            'pending_payment' => $this->payment_status === 'rejected' ? 'Pago rechazado' : 'Pendiente de pago',
+            'paid' => 'Pago confirmado', 'processing' => 'En preparación', 'shipped' => 'Enviado', 'delivered' => 'Entregado', 'canceled' => 'Cancelado', default => 'En actualización',
+        };
+    }
 }

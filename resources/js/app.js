@@ -41,6 +41,18 @@ document.addEventListener('change', (event) => {
     preview.hidden = !preview.src;
 });
 
+document.querySelectorAll('[data-shipping-address]').forEach((select) => {
+    select.addEventListener('change', () => {
+        const address = select.selectedOptions[0]?.dataset;
+        if (!address?.line1) return;
+        const fields = { customer_name: address.name, customer_phone: address.phone, shipping_address_line_1: address.line1, shipping_address_line_2: address.line2, shipping_neighborhood: address.neighborhood, shipping_city: address.city, shipping_state: address.state, shipping_postal_code: address.postalCode };
+        Object.entries(fields).forEach(([name, value]) => {
+            const field = select.form?.elements.namedItem(name);
+            if (field) field.value = value || '';
+        });
+    });
+});
+
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 const adminMenuToggle = document.querySelector('.admin-menu-toggle');

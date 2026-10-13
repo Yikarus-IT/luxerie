@@ -33,14 +33,19 @@ class MercadoPagoService
         $payload = [
             'items' => $order->items->map(fn ($item) => ['id' => $item->sku, 'title' => $item->name, 'quantity' => $item->quantity, 'currency_id' => $order->currency, 'unit_price' => (float) $item->unit_price])->values()->all(),
             'payer' => ['name' => $order->customer_name, 'email' => $order->customer_email, 'phone' => ['number' => $order->customer_phone]],
-            'shipments' => ['cost' => (float) $order->shipping_total, 'mode' => 'not_specified'],
+            'shipments' => ['cost' => 0, 'mode' => 'not_specified'],
             'external_reference' => $order->number,
-            'back_urls' => ['success' => route('payments.result', ['order' => $order, 'result' => 'success']), 'pending' => route('payments.result', ['order' => $order, 'result' => 'pending']), 'failure' => route('payments.result', ['order' => $order, 'result' => 'failure'])],
-            'notification_url' => route('payments.webhook', ['source_news' => 'webhooks']),
-            'auto_return' => 'approved',
             'statement_descriptor' => 'LUXERIE',
             'metadata' => ['order_id' => $order->id, 'order_number' => $order->number],
         ];
+
+        $appUrl = (string) config('app.url');
+        $isLocalUrl = str_contains($appUrl, 'localhost') || str_contains($appUrl, '127.0.0.1');
+        if (! $isLocalUrl) {
+            $payload['back_urls'] = ['success' => route('payments.result', ['order' => $order, 'result' => 'success']), 'pending' => route('payments.result', ['order' => $order, 'result' => 'pending']), 'failure' => route('payments.result', ['order' => $order, 'result' => 'failure'])];
+            $payload['notification_url'] = route('payments.webhook', ['source_news' => 'webhooks']);
+            $payload['auto_return'] = 'approved';
+        }
 
         $attempt->update(['status' => 'initializing', 'request_payload' => $payload]);
         $response = $this->client()->withHeader('X-Idempotency-Key', $attempt->idempotency_key)->post('/checkout/preferences', $payload);
@@ -68,9 +73,13 @@ class MercadoPagoService
         }
 
         $attempt = $order->paymentAttempts()->where('provider', 'mercado_pago')->latest()->first();
-        $attempt?->update(['external_id' => (string) $paymentId, 'status' => (string) data_get($data, 'status', 'unknown'), 'response_payload' => $data, 'processed_at' => now()]);
-        if (data_get($data, 'status') === 'approved') {
+        $paymentStatus = (string) data_get($data, 'status', 'unknown');
+        $attempt?->update(['external_id' => (string) $paymentId, 'status' => $paymentStatus, 'response_payload' => $data, 'processed_at' => now()]);
+        if ($paymentStatus === 'approved') {
             $checkout->markPaid($order, 'Pago confirmado automáticamente por Mercado Pago.');
+        } elseif (in_array($paymentStatus, ['rejected', 'cancelled'], true) && $order->payment_status !== 'rejected') {
+            $order->update(['payment_status' => 'rejected']);
+            $order->statusHistory()->create(['status' => 'pending_payment', 'comment' => 'Mercado Pago no aprobó el pago. El cliente puede intentarlo nuevamente.', 'created_at' => now()]);
         }
 
         return $order->fresh();
