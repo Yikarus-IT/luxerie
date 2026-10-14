@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\HomepageContent;
+use App\Models\HomepageRevision;
 use App\Models\MediaAsset;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -21,6 +22,7 @@ class HomepageController extends Controller
             'layout' => $homepage?->resolvedLayout() ?? HomepageContent::defaultLayout(),
             'homepage' => $homepage,
             'mediaAssets' => MediaAsset::with('media')->latest()->get(),
+            'revisions' => HomepageRevision::with('user')->latest()->get(),
         ]);
     }
 
@@ -75,6 +77,13 @@ class HomepageController extends Controller
         ]);
 
         if ($validated['action'] === 'publish') {
+            HomepageRevision::create([
+                'content' => $validated['content'],
+                'media' => array_filter($validated['media'] ?? []),
+                'layout' => $layout,
+                'user_id' => $request->user()->id,
+            ]);
+
             $homepage->published_content = $validated['content'];
             $homepage->published_media = array_filter($validated['media'] ?? []);
             $homepage->published_layout = $layout;
@@ -92,5 +101,19 @@ class HomepageController extends Controller
         $homepage->save();
 
         return back()->with('success', ['publish' => 'Página de inicio publicada.', 'schedule' => 'Publicación programada.', 'draft' => 'Borrador guardado.'][$validated['action']]);
+    }
+
+    public function restore(HomepageRevision $revision): RedirectResponse
+    {
+        $homepage = HomepageContent::query()->firstOrNew(['id' => 1]);
+        $homepage->fill([
+            'content' => $revision->content,
+            'media' => $revision->media ?? [],
+            'layout' => $revision->layout ?? HomepageContent::defaultLayout(),
+            'updated_by' => auth()->id(),
+        ]);
+        $homepage->save();
+
+        return back()->with('success', 'Revisión restaurada como borrador.');
     }
 }

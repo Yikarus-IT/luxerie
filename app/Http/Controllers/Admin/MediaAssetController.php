@@ -18,7 +18,18 @@ class MediaAssetController extends Controller
         $assets = MediaAsset::with('media')->when($request->filled('q'), fn ($query) => $query->where(fn ($nested) => $nested->where('title', 'like', '%'.$request->string('q').'%')->orWhere('alt_text', 'like', '%'.$request->string('q').'%')))->latest()->paginate(12)->withQueryString();
         $assets->getCollection()->each(fn ($asset) => $asset->setAttribute('in_use', $this->isUsed($asset->id)));
 
-        return view('admin.media.index', ['assets' => $assets]);
+        $usageTypes = [
+            'hero' => 'Hero (Principal)',
+            'about' => 'Sección "Nosotros"',
+            'benefits' => 'Beneficios',
+            'product' => 'Producto',
+            'ritual' => 'Ritual',
+            'testimonial' => 'Testimonio',
+            'gallery' => 'Galería de producto',
+            'other' => 'Otro',
+        ];
+
+        return view('admin.media.index', ['assets' => $assets, 'usageTypes' => $usageTypes]);
     }
 
     public function store(Request $request): RedirectResponse
@@ -59,6 +70,7 @@ class MediaAssetController extends Controller
         return $request->validate([
             'title' => ['nullable', 'string', 'max:120'],
             'alt_text' => ['required', 'string', 'max:255'],
+            'usage_type' => ['required', 'in:hero,about,benefits,product,ritual,testimonial,gallery,other'],
             'image' => [$imageRequired ? 'required' : 'nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:8192'],
         ]);
     }
