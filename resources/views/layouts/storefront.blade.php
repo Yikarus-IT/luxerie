@@ -39,7 +39,7 @@
                 <a class="customer-greeting" href="{{ route('customer.account') }}">Hola, {{ auth('customer')->user()->first_name }}</a>
                 <form method="POST" action="{{ route('customer.logout') }}">@csrf<button class="header-account" type="submit">Cerrar sesión</button></form>
             @else
-                <a class="header-account" href="{{ route('customer.login') }}">Mi cuenta</a>
+                <a class="header-account" href="{{ route('customer.login') }}">Iniciar sesión</a>
             @endif
             <a class="header-action" href="{{ route('cart.index') }}">Carrito <span>{{ $cartItemCount }}</span></a>
             <button class="mobile-menu-toggle" type="button" aria-expanded="false" aria-controls="mobile-navigation" aria-label="Abrir menú">
@@ -58,7 +58,7 @@
                 <a class="mobile-customer-greeting" href="{{ route('customer.account') }}">Hola, {{ auth('customer')->user()->first_name }}</a>
                 <form method="POST" action="{{ route('customer.logout') }}">@csrf<button class="mobile-account-action" type="submit">Cerrar sesión</button></form>
             @else
-                <a href="{{ route('customer.login') }}">Mi cuenta</a>
+                <a href="{{ route('customer.login') }}">Iniciar sesión</a>
             @endif
             <a href="{{ route('cart.index') }}">Carrito <span>{{ $cartItemCount }}</span></a>
         </nav>

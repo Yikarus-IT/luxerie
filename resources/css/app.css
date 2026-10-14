@@ -167,7 +167,7 @@
 @media(prefers-reduced-motion:reduce){.luxerie-banner img,.luxerie-banner-motion-1{transition:none;transform:none;clip-path:none}.luxerie-banner-motion-0.is-visible img,.luxerie-banner-motion-2.is-visible img,.luxerie-banner-motion-3.is-visible img{transform:none}}
 
 /* Customer account */
-.header-account{min-height:44px;padding:12px 0;border:0;background:transparent;color:var(--ink);cursor:pointer;font:700 11px var(--sans);letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
+.header-account{min-height:44px;padding:12px 0;border:0;background:transparent;color:var(--ink);cursor:pointer;font:700 11px var(--sans);letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;transform:translateY(2px)}
 .customer-greeting{max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;color:#695c62}
 .account-page{min-height:calc(100vh - 170px);padding:clamp(60px,9vw,120px) var(--page-gutter);display:grid;place-items:center;background:var(--cream)}
 .account-card{width:min(520px,100%);padding:clamp(30px,6vw,58px);background:var(--paper);box-shadow:0 24px 70px rgba(73,39,49,.12)}
